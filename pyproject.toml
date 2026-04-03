@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-tool-access-requests"
+version = "0.1.0"
+description = "Minimal Django + PostgreSQL internal app for AI tool access requests and approvals"
+readme = "README.md"
+authors = [
+    { name = "Shiki Ichitose", email = "149179099+ShikiIchitose@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+  "Django>=6.0,<6.1",
+  "psycopg[binary]>=3.2",
+]
+
+# ---- dev deps (uv) ----
+[dependency-groups]
+dev = [
+  "ruff",
+  "pytest",
+  "pytest-django",
+  "pyrefly",
+  "django-stubs>=6.0.1",
+]
+
+# ---- dev deps (pip extras) ----
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "pytest",
+  "pytest-django",
+  "pyrefly",
+  "django-stubs>=6.0.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["config*", "access_requests*"]
+namespaces = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["E402", "I001"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+testpaths = ["access_requests/tests"]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-ra"
+
+[tool.pyrefly]
+project-includes = ["config/**/*.py", "access_requests/**/*.py"]
+search-path = ["."]
+
+[tool.djlint]
+profile = "django"
+ignore = "H031"

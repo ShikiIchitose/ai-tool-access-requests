@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: ai_tool_access_requests_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d ai_tool_access_requests_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_NAME: ai_tool_access_requests_ci
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DJANGO_SECRET_KEY: ci-not-secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install uv (with cache)
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          # Best practice: pin uv if you want stricter reproducibility
+          # version: "0.11.3"
+
+      - name: Install dependencies (locked)
+        run: uv sync --locked --all-groups
+
+      - name: Lint
+        run: uv run --frozen ruff check .
+
+      - name: Format (check)
+        run: uv run --frozen ruff format --check .
+
+      - name: Tests
+        run: uv run --frozen pytest -q
+
+      - name: Static check
+        run: uv run --frozen pyrefly check --output-format=github

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}
+    {{ tool.name }}
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>{{ tool.name }}</h2>
+        <dl class="detail-list">
+            <dt>Vendor</dt>
+            <dd>
+                {{ tool.vendor }}
+            </dd>
+            <dt>Code</dt>
+            <dd>
+                <code>{{ tool.code }}</code>
+            </dd>
+            <dt>Description</dt>
+            <dd>
+                {{ tool.description }}
+            </dd>
+            <dt>Homepage</dt>
+            <dd>
+                {% if tool.homepage_url %}
+                    <a href="{{ tool.homepage_url }}">{{ tool.homepage_url }}</a>
+                {% else %}
+                    Not provided.
+                {% endif %}
+            </dd>
+        </dl>
+        <div class="link-row">
+            <a href="{% url 'tool_list' %}">Back to tool list</a>
+        </div>
+    </section>
+{% endblock content %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}
+    Review Queue | AI Tool Access Requests
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>Review queue</h2>
+        <p>This page is available only to reviewers.</p>
+        <p>Pending requests that you can review are listed oldest first.</p>
+        {% if review_queue %}
+            <ul class="record-list">
+                {% for access_request in review_queue %}
+                    <li>
+                        <strong>{{ access_request.ai_tool.name }}</strong>
+                        <div>
+                            Requested by <strong>{{ access_request.requester.username }}</strong>
+                        </div>
+                        <div>
+                            <span class="status-badge status-badge--pending">Pending</span>
+                        </div>
+                        <div class="muted">Submitted at {{ access_request.created_at }}</div>
+                        <div class="link-row">
+                            <a href="{% url 'review_detail' access_request.pk %}">Open review</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No pending requests are currently available for review.</p>
+        {% endif %}
+    </section>
+{% endblock content %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}
+    New Access Request
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>New access request</h2>
+        <p>Submit a new request for access to an active AI tool.</p>
+        <form class="form-stack" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit request</button>
+        </form>
+        <div class="link-row">
+            <a href="{% url 'tool_list' %}">Back to tool list</a>
+            <a href="{% url 'my_request_list' %}">View my requests</a>
+        </div>
+    </section>
+{% endblock content %}

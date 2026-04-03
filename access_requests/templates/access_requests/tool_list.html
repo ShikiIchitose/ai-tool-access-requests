@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+    AI Tools
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>AI tools</h2>
+        <p>Browse active AI tools that can be requested.</p>
+        <ul class="record-list">
+            {% for tool in tool_list %}
+                <li>
+                    <a href="{% url 'tool_detail' code=tool.code %}"><strong>{{ tool.name }}</strong></a>
+                    <div class="muted">{{ tool.vendor }}</div>
+                </li>
+            {% empty %}
+                <li>No active tools are currently available.</li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endblock content %}

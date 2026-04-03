@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}
+    My Request #{{ access_request.pk }} | AI Tool Access Requests
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>My request #{{ access_request.pk }}</h2>
+        <p>This is the requester-facing detail view for your submitted request.</p>
+        <dl class="detail-list">
+            <dt>Tool</dt>
+            <dd>
+                {{ access_request.ai_tool.name }}
+            </dd>
+            <dt>Vendor</dt>
+            <dd>
+                {{ access_request.ai_tool.vendor }}
+            </dd>
+            <dt>Status</dt>
+            <dd>
+                <span class="status-badge status-badge--{{ access_request.status }}">{{ access_request.get_status_display }}</span>
+            </dd>
+            <dt>Purpose</dt>
+            <dd>
+                {{ access_request.purpose }}
+            </dd>
+            <dt>Data classification</dt>
+            <dd>
+                {{ access_request.get_data_classification_display }}
+            </dd>
+            <dt>Business justification</dt>
+            <dd>
+                {{ access_request.business_justification }}
+            </dd>
+            {% if access_request.notes %}
+                <dt>Notes</dt>
+                <dd>
+                    {{ access_request.notes }}
+                </dd>
+            {% endif %}
+            {% if access_request.reviewed_by %}
+                <dt>Reviewed by</dt>
+                <dd>
+                    {{ access_request.reviewed_by.username }}
+                </dd>
+            {% endif %}
+            {% if access_request.reviewed_at %}
+                <dt>Reviewed at</dt>
+                <dd>
+                    {{ access_request.reviewed_at }}
+                </dd>
+            {% endif %}
+            {% if access_request.review_comment %}
+                <dt>Review comment</dt>
+                <dd>
+                    {{ access_request.review_comment }}
+                </dd>
+            {% endif %}
+        </dl>
+        <div class="link-row">
+            <a href="{% url 'my_request_list' %}">Back to my requests</a>
+        </div>
+    </section>
+{% endblock content %}

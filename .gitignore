@@ -1,0 +1,87 @@
+# --------------------------------------------------------------------
+# Python bytecode / caches
+# --------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --------------------------------------------------------------------
+# Packaging / build artifacts
+# --------------------------------------------------------------------
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# --------------------------------------------------------------------
+# Virtual environments
+# --------------------------------------------------------------------
+.venv/
+venv/
+env/
+
+# --------------------------------------------------------------------
+# Test / type-check / tooling caches
+# --------------------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Coverage (optional but common)
+.coverage
+coverage.xml
+htmlcov/
+
+# --------------------------------------------------------------------
+# Jupyter
+# --------------------------------------------------------------------
+.ipynb_checkpoints/
+
+# --------------------------------------------------------------------
+# Environment variables / secrets
+# --------------------------------------------------------------------
+.env
+.env.*
+*.secrets.*
+
+# --------------------------------------------------------------------
+# OS / editor
+# --------------------------------------------------------------------
+.DS_Store
+.idea/
+
+# VS Code: ignore all, but allow sharing recommended settings
+.vscode/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# --------------------------------------------------------------------
+# Local project-specific files (do not commit)
+# --------------------------------------------------------------------
+tests/.cache/
+
+# keep generated data ignored by default
+data/**
+
+# but keep the demo dataset tracked for deployment
+!data/clean/
+!data/clean/events.parquet
+!data/clean/users.parquet
+!data/clean/job_runs.parquet
+
+# Scratch / temp
+scratch/
+tmp/
+temp/
+
+# ignore Django environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Project policy (currently ignored; revisit for portfolio reproducibility)
+examples/

@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="description"
+              content="Minimal Django backend for enterprise AI tool access request and approval workflows." />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>
+            {% block title %}
+                AI Tool Access Requests
+            {% endblock title %}
+        </title>
+        <link rel="stylesheet" href="{% static 'access_requests/styles.css' %}" />
+    </head>
+    <body>
+        <header class="site-header">
+            <div class="site-header__inner">
+                <h1 class="site-title">
+                    <a class="site-brand" href="{% url 'dashboard' %}">AI Tool Access Requests</a>
+                </h1>
+                <nav class="site-nav" aria-label="Primary">
+                    {% if request.user.is_authenticated %}
+                        <div class="site-nav__links">
+                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                            <a class="nav-link" href="{% url 'tool_list' %}">Browse AI tools</a>
+                            <a class="nav-link" href="{% url 'my_request_list' %}">My requests</a>
+                            {% if is_reviewer %}
+                                <a class="nav-link" href="{% url 'review_list' %}">Review queue</a>
+                            {% endif %}
+                            {% if request.user.is_staff %}
+                                <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                            {% endif %}
+                        </div>
+                        <div class="site-nav__user">
+                            <span class="site-nav__user-status">
+                                Signed in as <strong class="site-nav__user-name">{{ request.user.username }}</strong>
+                            </span>
+                            <form class="inline-form" method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button class="button button--ghost" type="submit">Log out</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="site-nav__links">
+                            <a class="nav-link" href="{% url 'login' %}">Log in</a>
+                        </div>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+        <main class="page-shell">
+            {% if messages %}
+                <ul class="message-list">
+                    {% for message in messages %}<li class="message-item">{{ message }}</li>{% endfor %}
+                </ul>
+            {% endif %}
+            <div class="page-content">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </main>
+    </body>
+</html>

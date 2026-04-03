@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}
+    Dashboard | AI Tool Access Requests
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>Dashboard</h2>
+        <p>
+            Signed in as <strong>{{ request.user.username }}</strong>.
+        </p>
+        <h3>Current role summary</h3>
+        <ul class="meta-list">
+            <li>Authenticated user: Yes</li>
+            <li>Reviewer: {{ is_reviewer|yesno:"Yes,No" }}</li>
+            <li>Admin operator: {{ is_admin_operator|yesno:"Yes,No" }}</li>
+        </ul>
+    </section>
+    <section>
+        <h3>Requester actions</h3>
+        <ul class="action-list">
+            <li>
+                <a href="{% url 'tool_list' %}">Browse AI tools</a>
+            </li>
+            <li>
+                <a href="{% url 'request_create' %}">Create a new request</a>
+            </li>
+            <li>
+                <a href="{% url 'my_request_list' %}">View my requests</a>
+            </li>
+        </ul>
+    </section>
+    {% if is_reviewer %}
+        <section>
+            <h3>Reviewer actions</h3>
+            <ul class="action-list">
+                <li>
+                    <a href="{% url 'review_list' %}">Open review queue</a>
+                </li>
+            </ul>
+            <p class="muted">Reviewer pages are separate from requester-facing request pages.</p>
+        </section>
+    {% endif %}
+    {% if is_admin_operator %}
+        <section>
+            <h3>Admin actions</h3>
+            <ul class="action-list">
+                <li>
+                    <a href="{% url 'admin:index' %}">Open Django admin</a>
+                </li>
+            </ul>
+        </section>
+    {% endif %}
+{% endblock content %}

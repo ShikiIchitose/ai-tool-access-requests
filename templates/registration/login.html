@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}
+    Log in | AI Tool Access Requests
+{% endblock title %}
+{% block content %}
+    <section>
+        <h2>Log in</h2>
+        <p>
+            Use an existing account created by an administrator.
+            Self-signup is out of scope for v0.1.0.
+        </p>
+        {% if form.errors %}<p class="muted">Your username and password did not match. Please try again.</p>{% endif %}
+        <form class="form-stack" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div>
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.errors %}<div>{{ form.username.errors }}</div>{% endif %}
+            </div>
+            <div>
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                {% if form.password.errors %}<div>{{ form.password.errors }}</div>{% endif %}
+            </div>
+            {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+            <button type="submit">Log in</button>
+        </form>
+    </section>
+{% endblock content %}
