@@ -15,6 +15,62 @@ The screenshots below show the two main user perspectives in the application: re
 | <img src="docs/images/my-requests-dark.png" alt="Requester-facing My requests page showing submitted requests and their current statuses" width="100%"> | <img src="docs/images/review-queue-dark.png" alt="Reviewer-facing Review queue page showing pending requests and review actions" width="100%"> |
 | *Tracking submitted requests and their current statuses from the requester-facing view.* | *Reviewing pending requests through a dedicated reviewer-facing queue, ordered oldest first.* |
 
+## Portfolio demo access
+
+The login page includes **portfolio demo access** buttons in addition to the standard username/password form.
+
+Public demo roles:
+
+- **Demo requester**
+  - browse active AI tools
+  - submit a new access request
+  - view requester-facing request history
+
+- **Demo reviewer**
+  - open the reviewer-only queue
+  - inspect pending requests
+  - execute approve or reject decisions through the dedicated review UI
+
+Notes:
+
+- The public demo exposes only the requester and reviewer perspectives.
+- **Django admin is not part of the public demo surface.**
+- This demo access flow is a portfolio convenience feature for evaluation, not a production authentication pattern.
+
+## Seeded demo state
+
+The public demo includes a small seeded dataset so the main flows are immediately visible.
+
+Included demo state:
+
+- active tools for:
+  - ChatGPT Enterprise
+  - Claude Enterprise
+  - Gemini Enterprise
+- at least one reviewer-visible `pending` request
+- at least one `approved` request
+- at least one `rejected` request
+
+The reviewer-visible pending request is intentionally seeded so that the review queue is usable immediately after demo reviewer login.
+
+## How to try the demo
+
+### Requester flow
+
+1. Open the live demo.
+2. On `/login/`, select **Continue as demo requester**.
+3. Browse the tool catalog.
+4. Create a new access request for an active tool.
+5. Open **My requests** to inspect submitted requests and their statuses.
+
+### Reviewer flow
+
+1. Open the live demo.
+2. On `/login/`, select **Continue as demo reviewer**.
+3. Open the review queue.
+4. Inspect a pending request that is ready for review.
+5. Approve or reject it through the dedicated reviewer-facing screen.
+
 ## What this project demonstrates
 
 - Practical use of Django built-in features
@@ -25,6 +81,7 @@ The screenshots below show the two main user perspectives in the application: re
 - Clear separation between requester-facing, reviewer-facing, and admin responsibilities
 - Inspection-only admin design for sensitive workflow records
 - A focused automated test suite that protects the application's core behavior against regressions
+- A thin, environment-gated demo access layer added without re-architecting the core authentication model
 
 ## Project overview
 
@@ -105,6 +162,7 @@ The aim is not broad but shallow coverage. Instead, the test suite focuses on pr
 - model-level consistency
 - database-backed duplicate pending protection
 - inspection-only admin behavior
+- portfolio demo login behavior and deployment-state expectations
 
 The tests are organized by responsibility:
 
@@ -132,13 +190,20 @@ The tests are organized by responsibility:
   - inspection-only behavior for `AccessRequest`
   - protection against admin-side workflow bypass
 
-In other words, the test suite is intentionally aimed at reducing the chance that routine refactors or feature changes will break request creation, review execution, permission boundaries, or admin safety.
+- `test_auth_demo.py`
+  - demo login page rendering
+  - requester and reviewer demo login behavior
+  - safe `next` redirect handling
+  - disabled-feature and missing-demo-user behavior
+  - `ensure_demo_state` provisioning expectations
+
+In other words, the test suite is intentionally aimed at reducing the chance that routine refactors or feature changes will break request creation, review execution, permission boundaries, admin safety, or the portfolio demo access surface.
 
 ## Current test status
 
-- 52 tests passing
+- 64 tests passing
 
-This reinforces the main quality goal of the project: protecting core workflow behavior while keeping the application intentionally small.
+This includes the core workflow test suite as well as dedicated coverage for the portfolio demo login flow, including enabled and disabled rendering, safe `next` handling, and demo-state provisioning expectations.
 
 ## Tech stack
 
@@ -274,6 +339,24 @@ Recommended example fields:
 
 Normal operation is based on **soft deactivation** with `is_active=False` rather than deleting tools.
 
+## Demo deployment notes
+
+To enable the portfolio demo flow in a deployed environment, set:
+
+```env
+ENABLE_DEMO_LOGIN=true
+DEMO_REQUESTER_USERNAME=demo-requester
+DEMO_REVIEWER_USERNAME=demo-reviewer
+```
+
+After deploy, provision or repair the demo state with:
+
+```bash
+uv run python manage.py ensure_demo_state
+```
+
+This command ensures the demo users, reviewer-group membership, active demo tools, and the minimum seeded request-state set required for the public demo.
+
 ## Running tests
 
 Run the full automated test suite with:
@@ -295,6 +378,7 @@ The tests are intentionally focused on core workflow safety rather than cosmetic
 - self-review prohibition
 - model and database consistency
 - admin-side safety
+- demo login behavior in enabled and disabled deployment modes
 
 ## Scope and non-goals
 

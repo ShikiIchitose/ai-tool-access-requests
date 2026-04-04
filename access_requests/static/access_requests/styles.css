@@ -258,6 +258,10 @@ section {
   box-shadow: var(--shadow);
 }
 
+.demo-login-section {
+  margin-top: 1.25rem;
+}
+
 h1,
 h2,
 h3 {

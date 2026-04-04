@@ -19,13 +19,17 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
+from access_requests.auth_views import (
+    PortfolioLoginView,
+    demo_login_requester,
+    demo_login_reviewer,
+)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path(
-        "login/",
-        auth_views.LoginView.as_view(template_name="registration/login.html"),
-        name="login",
-    ),
+    path("login/", PortfolioLoginView.as_view(), name="login"),
+    path("login/demo/requester/", demo_login_requester, name="demo_login_requester"),
+    path("login/demo/reviewer/", demo_login_reviewer, name="demo_login_reviewer"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("", include("access_requests.urls")),
 ]
