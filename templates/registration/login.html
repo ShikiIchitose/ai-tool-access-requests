@@ -25,5 +25,27 @@
             {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
             <button type="submit">Log in</button>
         </form>
+        {% if enable_demo_login %}
+            <section class="demo-login-section">
+                <h3>Portfolio demo access</h3>
+                <p class="muted">Use the demo buttons below to explore the requester and reviewer flows without typing credentials.</p>
+                <div class="form-stack">
+                    <form class="form-stack"
+                          method="post"
+                          action="{% url 'demo_login_requester' %}">
+                        {% csrf_token %}
+                        {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+                        <button type="submit">Continue as demo requester</button>
+                    </form>
+                    <form class="form-stack"
+                          method="post"
+                          action="{% url 'demo_login_reviewer' %}">
+                        {% csrf_token %}
+                        {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+                        <button type="submit">Continue as demo reviewer</button>
+                    </form>
+                </div>
+            </section>
+        {% endif %}
     </section>
 {% endblock content %}

@@ -13,6 +13,14 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+
+def env_bool(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -71,6 +79,16 @@ TEMPLATES = [
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
+
+ENABLE_DEMO_LOGIN = env_bool("ENABLE_DEMO_LOGIN", default=False)
+
+DEMO_REQUESTER_USERNAME = (
+    os.environ.get("DEMO_REQUESTER_USERNAME", "demo-requester").strip()
+    or "demo-requester"
+)
+DEMO_REVIEWER_USERNAME = (
+    os.environ.get("DEMO_REVIEWER_USERNAME", "demo-reviewer").strip() or "demo-reviewer"
+)
 
 WSGI_APPLICATION = "config.wsgi.application"
 

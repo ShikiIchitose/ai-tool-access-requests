@@ -64,6 +64,17 @@ Django admin は便利ですが、業務ワークフローの本体を admin に
 このリポジトリでは、v0.1.0 の MVP として必要十分な automated tests を揃えることを重視しました。  
 フォーム、ルート、権限、レビュー実行、モデル整合性、データベース制約、admin の安全性を責務ごとに分けて確認し、通常のリファクタや機能変更でコア業務ルールが壊れにくい状態を目指しています。
 
+### 5. 認証必須アプリに対して、公開デモ導線を小さく追加していること
+
+このアプリは認証必須であり、申請者・レビュワーのロール分離もあるため、そのままではポートフォリオ閲覧者が挙動を試しにくいという課題がありました。  
+そこで今回、認証モデル全体を作り直すのではなく、`/login/` にポートフォリオ用の demo login buttons を追加し、申請者・レビュワーの 2 ロールをすぐに試せるようにしています。
+
+重要なのは、これを別物の認証機構として広げず、既存の Django built-ins の上に薄く載せた access convenience layer に留めている点です。  
+custom authentication backend や public signup を増やすのではなく、既存のワークフローと権限設計を維持したまま、評価しやすさだけを改善しています。
+
+また、デモ用の状態整備も `ensure_demo_state` management command に分離し、demo users、reviewer group、active tool seeds、reviewer から見える `pending` / `approved` / `rejected` の最小状態を再実行可能な形で揃えています。  
+これにより、単に「ログインしやすくした」だけでなく、公開デモとして見せるための導線と状態管理を、最小構成のまま整理していることも示しています。
+
 ---
 
 ## 開発方針
@@ -124,6 +135,33 @@ Django / PostgreSQL を用いて、エンタープライズ向け AI ツール�
 
 **示せるスキル**  
 Django を用いたバックエンド開発、認証・認可設計、業務ワークフロー実装、PostgreSQL を使ったデータモデリング、権限制御、テストを含めた品質管理、ドキュメント整備
+
+### 2026/4/4 — ポートフォリオ用公開デモログイン機能を追加
+
+**概要**  
+認証必須アプリであることによる公開デモ時の摩擦を下げるため、`/login/` にポートフォリオ用 demo login buttons を追加しました。  
+申請者とレビュワーの 2 ロールを手入力なしで試せるようにしつつ、既存の認証・認可モデルそのものは作り直さず、Django built-ins の上に薄く追加する形に留めています。
+
+**この更新で行ったこと**
+
+- `PortfolioLoginView` と demo login routes を追加
+- `ENABLE_DEMO_LOGIN` と demo username 設定を追加
+- `ensure_demo_state` management command を追加
+- demo users / active tools / reviewer-visible `pending` / `approved` / `rejected` の最小 demo dataset を整備
+- demo login 専用の automated tests を追加
+- README / deployment notes を公開デモ前提に更新
+
+**この更新の意図**  
+この改善の目的は、新しい認証機構を作ることではなく、ポートフォリオ閲覧者が requester / reviewer のフローをすぐ確認できるようにすることです。  
+public signup や password reset、admin demo login のようなスコープ拡大は避け、既存の業務アプリ設計を崩さずに、評価のしやすさだけを最小限の変更で改善しています。
+
+**見てほしい点**
+
+- 認証必須アプリに対して、公開デモ導線を後付けしていること
+- demo access を環境変数で明示的に制御していること
+- demo state を management command で再実行可能に整備していること
+- reviewer queue が空にならないよう、デモ閲覧のしやすさまで含めて設計していること
+- この改善自体も tests と文書更新を含めて整えていること
 
 ---
 
