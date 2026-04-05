@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+
 
 def env_bool(name: str, default: bool = False) -> bool:
     value = os.environ.get(name)
@@ -32,10 +34,38 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+RENDER = "RENDER" in os.environ
 
-ALLOWED_HOSTS = []
+DEBUG = env_bool("DJANGO_DEBUG", default=not RENDER)
 
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if render_hostname:
+    ALLOWED_HOSTS.append(render_hostname)
+
+extra_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "").strip()
+if extra_allowed_hosts:
+    ALLOWED_HOSTS.extend(
+        host.strip() for host in extra_allowed_hosts.split(",") if host.strip()
+    )
+
+CSRF_TRUSTED_ORIGINS = []
+
+render_external_url = os.environ.get("RENDER_EXTERNAL_URL", "").strip()
+if render_external_url:
+    CSRF_TRUSTED_ORIGINS.append(render_external_url)
+
+extra_csrf_trusted_origins = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").strip()
+if extra_csrf_trusted_origins:
+    CSRF_TRUSTED_ORIGINS.extend(
+        origin.strip()
+        for origin in extra_csrf_trusted_origins.split(",")
+        if origin.strip()
+    )
 
 # Application definition
 
@@ -51,6 +81,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,14 +128,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["DB_NAME"],
-        "USER": os.environ["DB_USER"],
-        "PASSWORD": os.environ["DB_PASSWORD"],
-        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
-    }
+    "default": dj_database_url.config(
+        default=os.environ["DATABASE_URL"],
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
@@ -131,15 +159,36 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", default=RENDER)
+
+SECURE_HSTS_SECONDS = int(os.environ.get("DJANGO_SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool(
+    "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    default=False,
+)
+SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", default=False)

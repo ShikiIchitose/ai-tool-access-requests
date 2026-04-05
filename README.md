@@ -214,6 +214,9 @@ This includes the core workflow test suite as well as dedicated coverage for the
 - uv
 - Django templates and forms
 - Django admin
+- Gunicorn + Uvicorn worker
+- WhiteNoise
+- dj-database-url
 
 ## Architecture notes
 
@@ -283,16 +286,21 @@ source .env.local
 set +a
 ```
 
-Expected database-related settings are:
+This project now uses a single `DATABASE_URL` setting for database configuration.
+
+Example local values:
 
 ```env
-DB_NAME=your_db_name
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DJANGO_SECRET_KEY=replace-this-with-a-real-secret
+DATABASE_URL=postgresql://your_db_user:your_db_password@127.0.0.1:5432/your_db_name
+DJANGO_SECRET_KEY=<replace-this-with-a-real-secret>
+DJANGO_DEBUG=true
 ```
+
+Notes:
+
+- `.env.example` is a local setup template for developers cloning the repository.
+- It is not read automatically by Render.
+- For deployed environments, set environment variables in the Render Dashboard.
 
 ### Apply migrations
 
@@ -339,23 +347,44 @@ Recommended example fields:
 
 Normal operation is based on **soft deactivation** with `is_active=False` rather than deleting tools.
 
-## Demo deployment notes
+## Demo Deployment Configuration Notes
 
-To enable the portfolio demo flow in a deployed environment, set:
+This portfolio project adopts a deployment-oriented configuration for its public demo environment.
+
+The main environment variables assumed for the public demo environment are:
 
 ```env
+DJANGO_SECRET_KEY=replace-with-a-strong-secret
+DATABASE_URL=postgresql://...
+PYTHON_VERSION=3.13.12
+DJANGO_DEBUG=false
+
 ENABLE_DEMO_LOGIN=true
 DEMO_REQUESTER_USERNAME=demo-requester
 DEMO_REVIEWER_USERNAME=demo-reviewer
+
+DJANGO_SECURE_SSL_REDIRECT=true
+DJANGO_SECURE_HSTS_SECONDS=0
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=false
+DJANGO_SECURE_HSTS_PRELOAD=false
 ```
 
-After deploy, provision or repair the demo state with:
+Notes:
+
+- Database configuration is standardized on `DATABASE_URL`.
+- `DJANGO_SECRET_KEY` is required by the application settings.
+- `.env.example` is a template for local setup and is not consumed automatically by Render.
+- `RENDER_EXTERNAL_HOSTNAME` and `RENDER_EXTERNAL_URL` are assumed to be provided by Render and are used by the settings layer for host and CSRF configuration.
+
+This repository includes a deployment build script at the project root:
 
 ```bash
-uv run python manage.py ensure_demo_state
+./build.sh
 ```
 
-This command ensures the demo users, reviewer-group membership, active demo tools, and the minimum seeded request-state set required for the public demo.
+This script is configured to install locked production dependencies, run `collectstatic`, and apply migrations.
+
+The public demo also assumes a reproducible seeded state managed through `ensure_demo_state`, including demo users, reviewer-group membership, active demo tools, and seeded pending, approved, and rejected requests.
 
 ## Running tests
 
