@@ -207,15 +207,18 @@
 
 これには、コアワークフローを対象とした既存のテストスイートに加え、表示の有効 / 無効切り替え、安全な `next` 処理、`ensure_demo_state` による前提状態整備まで含めた、ポートフォリオ用デモログインのテストも含まれています。
 
-## 技術スタック
+## 必須環境
 
 - Python 3.13
 - Django 6.0
 - PostgreSQL
 - psycopg 3
 - uv
-- Django のテンプレートとフォーム
+- Django templates and forms
 - Django admin
+- Gunicorn + Uvicorn worker
+- WhiteNoise
+- dj-database-url
 
 ## アーキテクチャノート
 
@@ -261,10 +264,10 @@
 ### 前提条件
 
 - Python 3.13
-- ローカルで動作する PostgreSQL
+- ローカルで起動している PostgreSQL
 - `uv`
 
-v0.1.0 では、PostgreSQL は Docker ではなくローカルで動作していることを前提としています。
+v0.1.0 時点では、PostgreSQL は Docker ではなくローカル起動を前提としています。
 
 ### 依存関係のインストール
 
@@ -276,7 +279,7 @@ uv sync
 
 `.env.example` をもとにローカル用の環境変数ファイルを作成し、手元の環境に合わせて値を設定してください。
 
-環境変数の読み込み方法は各自の運用に委ねています。たとえば、シェルから読み込む簡単な方法としては次の様な方法があります。
+例:
 
 ```bash
 cp .env.example .env.local
@@ -285,16 +288,21 @@ source .env.local
 set +a
 ```
 
-基本データベース関連設定は次の通りです。
+このプロジェクトでは、データベース設定は単一の `DATABASE_URL` を使う構成です。
+
+ローカル用の設定例:
 
 ```env
-DB_NAME=your_db_name
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_HOST=127.0.0.1
-DB_PORT=5432
+DATABASE_URL=postgresql://your_db_user:your_db_password@127.0.0.1:5432/your_db_name
 DJANGO_SECRET_KEY=replace-this-with-a-real-secret
+DJANGO_DEBUG=true
 ```
+
+補足:
+
+- `.env.example` は、このリポジトリを clone した開発者向けのローカルセットアップ用テンプレートです。
+- Render が `.env.example` を自動で読み取るわけではありません。
+- デプロイ環境では、環境変数は Render Dashboard で設定します。
 
 ### マイグレーションの適用
 
@@ -341,23 +349,44 @@ Django admin にログインした後、以下を行います。
 
 通常運用では、ツール削除ではなく `is_active=False` による**論理的な無効化**を前提にしています。
 
-## デモ用デプロイメモ
+## デモ用デプロイ構成メモ
 
-デプロイ環境でポートフォリオ用デモフローを有効にするには、次の環境変数を設定します。
+このポートフォリオでは、公開デモ用のデプロイ環境を想定した設定を採用しています。
+
+公開デモ環境で想定している主な環境変数:
 
 ```env
+DJANGO_SECRET_KEY=replace-with-a-strong-secret
+DATABASE_URL=postgresql://...
+PYTHON_VERSION=3.13.12
+DJANGO_DEBUG=false
+
 ENABLE_DEMO_LOGIN=true
 DEMO_REQUESTER_USERNAME=demo-requester
 DEMO_REVIEWER_USERNAME=demo-reviewer
+
+DJANGO_SECURE_SSL_REDIRECT=true
+DJANGO_SECURE_HSTS_SECONDS=0
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=false
+DJANGO_SECURE_HSTS_PRELOAD=false
 ```
 
-デプロイ後は、次のコマンドでデモ状態を作成または修復します。
+補足:
+
+- データベース設定は `DATABASE_URL` に統一しています。
+- アプリケーション設定上、`DJANGO_SECRET_KEY` は必須です。
+- `.env.example` はローカルセットアップ用のテンプレートであり、Render が自動で読み込むものではありません。
+- `RENDER_EXTERNAL_HOSTNAME` と `RENDER_EXTERNAL_URL` は Render から提供されることを前提としており、settings 層で host 設定および CSRF 設定に利用しています。
+
+このリポジトリには、プロジェクトルートにデプロイ用の `build.sh` を含めています。
 
 ```bash
-uv run python manage.py ensure_demo_state
+./build.sh
 ```
 
-このコマンドにより、demo users、reviewer group の所属状態、active な demo tools、そして公開デモに必要な最小限の申請状態が整備されます。
+この script は、lockfile に固定された本番用依存関係のインストール、`collectstatic`、および migration の適用を行う構成です。
+
+また、公開デモでは `ensure_demo_state` により、デモ用ユーザー、reviewer グループ所属、アクティブなデモ用ツール、および主要な申請状態が再現可能な形で整備される前提を置いています。
 
 ## テストの実行
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-tool-access-requests"
-version = "0.1.0"
+version = "0.1.1"
 description = "Minimal Django + PostgreSQL internal app for AI tool access requests and approvals"
 readme = "README.md"
 authors = [
@@ -16,6 +16,10 @@ license-files = ["LICENSE"]
 dependencies = [
   "Django>=6.0,<6.1",
   "psycopg[binary]>=3.2",
+  "gunicorn>=23.0.0",
+  "uvicorn>=0.35.0",
+  "whitenoise>=6.12.0",
+  "dj-database-url>=3.0.1",
 ]
 
 # ---- dev deps (uv) ----
@@ -56,7 +60,7 @@ select = ["E4", "E7", "E9", "F", "I"]
 quote-style = "double"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings"
+DJANGO_SETTINGS_MODULE = "config.settings_test"
 testpaths = ["access_requests/tests"]
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 addopts = "-ra"
