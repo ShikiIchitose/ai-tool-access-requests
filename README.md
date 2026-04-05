@@ -15,6 +15,14 @@ The screenshots below show the two main user perspectives in the application: re
 | <img src="docs/images/my-requests-dark.png" alt="Requester-facing My requests page showing submitted requests and their current statuses" width="100%"> | <img src="docs/images/review-queue-dark.png" alt="Reviewer-facing Review queue page showing pending requests and review actions" width="100%"> |
 | *Tracking submitted requests and their current statuses from the requester-facing view.* | *Reviewing pending requests through a dedicated reviewer-facing queue, ordered oldest first.* |
 
+## Live demo
+
+A public demo deployment is available here:
+
+- [Live demo](https://ai-tool-access-requests.onrender.com/)
+
+This demo is intended to make the requester-facing and reviewer-facing workflows easy to evaluate without creating local accounts first.
+
 ## Portfolio demo access
 
 The login page includes **portfolio demo access** buttons in addition to the standard username/password form.
@@ -52,6 +60,20 @@ Included demo state:
 - at least one `rejected` request
 
 The reviewer-visible pending request is intentionally seeded so that the review queue is usable immediately after demo reviewer login.
+
+The demo state is not only seeded for first-time visibility, but also designed to be reset back to a known baseline after public interaction.
+
+This is handled through two separate management commands:
+
+- `ensure_demo_state`
+  - provisions the baseline demo users, reviewer-group membership, active demo tools, and seeded requests
+
+- `reset_demo_state`
+  - clears public demo request data
+  - optionally re-seeds tools when needed
+  - delegates baseline reconstruction back to `ensure_demo_state`
+
+By default, `reset_demo_state` preserves the seeded `AITool` catalog and resets the request-side demo data only. This keeps normal public-demo maintenance lightweight while still allowing a full baseline rebuild when needed.
 
 ## How to try the demo
 
@@ -197,13 +219,19 @@ The tests are organized by responsibility:
   - disabled-feature and missing-demo-user behavior
   - `ensure_demo_state` provisioning expectations
 
-In other words, the test suite is intentionally aimed at reducing the chance that routine refactors or feature changes will break request creation, review execution, permission boundaries, admin safety, or the portfolio demo access surface.
+- `test_reset_demo_state.py`
+  - verifies that `--dry-run` does not modify the database
+  - verifies that seeded tools are preserved by default
+  - verifies optional full tool re-seeding with `--no-preserve-tools`
+  - verifies preview-oriented output behavior for higher verbosity levels
+
+In other words, the test suite is intentionally aimed at reducing the chance that routine refactors or operational changes will break request creation, review execution, permission boundaries, admin safety, the portfolio demo access surface, or the reproducible reset behavior of the public demo environment.
 
 ## Current test status
 
-- 64 tests passing
+- 68 tests passing
 
-This includes the core workflow test suite as well as dedicated coverage for the portfolio demo login flow, including enabled and disabled rendering, safe `next` handling, and demo-state provisioning expectations.
+This includes the core workflow test suite as well as dedicated coverage for the portfolio demo login flow, including enabled and disabled rendering, safe `next` handling, demo-state provisioning expectations, and reproducible public demo reset behavior.
 
 ## Tech stack
 
@@ -386,6 +414,31 @@ This script is configured to install locked production dependencies, run `collec
 
 The public demo also assumes a reproducible seeded state managed through `ensure_demo_state`, including demo users, reviewer-group membership, active demo tools, and seeded pending, approved, and rejected requests.
 
+### Public demo reset workflow
+
+Because the public demo can be modified by visitors, the repository also includes a dedicated reset command for restoring the demo database state to a known baseline.
+
+Typical manual usage from the Render Shell:
+
+```bash
+uv run python manage.py reset_demo_state --no-input
+```
+
+Useful variants:
+
+```bash
+uv run python manage.py reset_demo_state --dry-run
+uv run python manage.py reset_demo_state --no-preserve-tools --no-input
+```
+
+Operational intent:
+
+- normal reset keeps the seeded AI tool catalog intact
+- request-side demo data is reset to baseline
+- full tool re-seeding is available only when explicitly requested
+
+This command is intended as a lightweight operational maintenance tool for the public portfolio demo rather than as part of the end-user workflow.
+
 ## Running tests
 
 Run the full automated test suite with:
@@ -408,6 +461,7 @@ The tests are intentionally focused on core workflow safety rather than cosmetic
 - model and database consistency
 - admin-side safety
 - demo login behavior in enabled and disabled deployment modes
+- public demo reset reproducibility
 
 ## Scope and non-goals
 
