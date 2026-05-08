@@ -1,5 +1,9 @@
 # ai-tool-access-requests
 
+[![CI](https://github.com/ShikiIchitose/ai-tool-access-requests/actions/workflows/ci.yml/badge.svg)](https://github.com/ShikiIchitose/ai-tool-access-requests/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ShikiIchitose/ai-tool-access-requests?sort=semver&display_name=tag)](https://github.com/ShikiIchitose/ai-tool-access-requests/releases/latest)
+[![License](https://img.shields.io/github/license/ShikiIchitose/ai-tool-access-requests)](LICENSE)
+
 > 日本語版: [README.ja.md](README.ja.md)
 
 A minimal Django + PostgreSQL internal workflow application for requesting and reviewing access to enterprise AI tools.

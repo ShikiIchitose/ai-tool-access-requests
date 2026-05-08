@@ -1,5 +1,9 @@
 # ai-tool-access-requests
 
+[![CI](https://github.com/ShikiIchitose/ai-tool-access-requests/actions/workflows/ci.yml/badge.svg)](https://github.com/ShikiIchitose/ai-tool-access-requests/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ShikiIchitose/ai-tool-access-requests?sort=semver&display_name=tag)](https://github.com/ShikiIchitose/ai-tool-access-requests/releases/latest)
+[![License](https://img.shields.io/github/license/ShikiIchitose/ai-tool-access-requests)](LICENSE)
+
 エンタープライズ向け AI ツールの利用申請とレビューを行うための、最小構成の Django + PostgreSQL 製内部ワークフローアプリケーションです。
 
 このリポジトリは、Django を用いた実践的なバックエンド基礎力を示すためのポートフォリオ作品です。認証、認可、リレーショナルデータモデリング、フォームバリデーション、クラスベースビュー、運用を意識した admin 設計、そしてコア業務ルールを変更による退行から守るためのテストを主な題材としています。スコープは意図的に小さく絞っていますが、単なる CRUD デモではなく、現実的な社内業務アプリケーションに近いワークフローとなるよう設計しています。
